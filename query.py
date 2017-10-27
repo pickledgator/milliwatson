@@ -12,7 +12,7 @@ class WebQuery:
 
     def __init__(self):
         self.results = []
-        self.logger = logging.getLogger("WebQuery")
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def search_google(self, query, pages=5, print_results=False):
         """ 

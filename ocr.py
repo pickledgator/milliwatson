@@ -5,14 +5,16 @@ import os
 import cv2
 import pyscreenshot
 import numpy
+import logging
 
-class MilliWatsonOCR:
+class OCR:
     """OCR class that performs all cropping and OCR actions.
     Assumes that the image loaded is already cropped down to only the screen
     """
     def __init__(self):
         self.image_name = None
         self.image_data = None
+        self.logger = logging.getLogger(self.__class__.__name__)
         # self.question = []
 
     def load_image(self, image_name, show=False):
@@ -33,7 +35,7 @@ class MilliWatsonOCR:
             self.debug_image("capture", self.image_data)
         if save_filename:
             cv2.imwrite(save_filename+".jpg", self.image_data)
-            print("Saved capture as {}".format(save_filename+".jpg"))
+            self.logger.info("Saved capture as {}".format(save_filename+".jpg"))
 
     def split_image(self):
         """Parses the image into four chunks.
@@ -132,24 +134,24 @@ def main():
     arg_parser.add_argument("--save", "-s", help="Save the image")
     args = arg_parser.parse_args()
     
-    mW = MilliWatsonOCR()
+    ocr = OCR()
     if args.input_file:
         input_file = sanitize_file(args.input_file)
-        mW.load_image(input_file,show=False)
+        ocr.load_image(input_file,show=False)
     if args.capture:
         filename = args.save if args.save else None
-        mW.capture_screen(bbox=(0,23,494,1000), show=True, save_filename=filename)
+        ocr.capture_screen(bbox=(0,23,494,1000), show=True, save_filename=filename)
 
-    question = mW.get_question()
+    question = ocr.get_question()
     print("Question: {}".format(question))
 
-    answer_a_string = mW.get_answer_A()
+    answer_a_string = ocr.get_answer_A()
     print("Option A: {}".format(answer_a_string))
 
-    answer_b_string = mW.get_answer_B()
+    answer_b_string = ocr.get_answer_B()
     print("Option B: {}".format(answer_b_string))
 
-    answer_c_string = mW.get_answer_C()
+    answer_c_string = ocr.get_answer_C()
     print("Option C: {}".format(answer_c_string))
 
 
