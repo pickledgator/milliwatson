@@ -14,7 +14,7 @@ class WebQuery:
         self.results = []
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    def search_google(self, query, pages=5, print_results=False):
+    def search_google(self, query, pages=3, print_results=False):
         """ 
         Query google for search results 
         @param query String to send to google
@@ -25,6 +25,7 @@ class WebQuery:
         self.logger.info("Got {} results from the googz".format(len(self.results)))
         if print_results:
             print(self.results)
+
 
     def answer_frequency(self, answers):
         """ 

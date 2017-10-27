@@ -103,7 +103,7 @@ class OCR:
         cv2.imshow(description, image)
         cv2.waitKey(5000)
 
-    def run_ocr_on_image_section(self,x,y,w,h,show=True):
+    def run_ocr_on_image_section(self,x,y,w,h,show=False):
         """Runs OCR on a section of image and returns the string detected
         """
         cv_cropped = self.crop(self.image_data, x, y, w, h)

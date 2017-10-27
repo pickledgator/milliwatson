@@ -33,22 +33,37 @@ class MilliWatson:
                     if not self.processImage():
                         continue
                     self.run_query(self.data)
-                    self.show_data()
 
                 time.sleep(0.01)
 
     def processImage(self):
         try:
-            self.data['question'] = self.ocr.get_question()
+            self.data['question'] = self.clense(self.ocr.get_question())
             self.data['answers'] = []
-            self.data['answers'].append(self.ocr.get_answer_A())
-            self.data['answers'].append(self.ocr.get_answer_B())
-            self.data['answers'].append(self.ocr.get_answer_C())
-            self.data['image'] = self.ocr.image()
+            self.data['answers'].append(self.clense(self.ocr.get_answer_A()))
+            self.data['answers'].append(self.clense(self.ocr.get_answer_B()))
+            self.data['answers'].append(self.clense(self.ocr.get_answer_C()))
             return True
         except Exception as e:
             self.logger.error("Error parsing image {}".format(e))
         return False
+
+    def clense(self, in_string):
+        # remove hyphens followed by spaces
+        in_string = in_string.replace("- ","")
+        # remove special characters
+        in_string = in_string.replace("|","I")
+        # convert all lower
+        in_string = in_string.lower()
+        # convert digits to text
+        words = in_string.split(" ")
+        words_no_digits = []
+        for word in words:
+            try:
+                words_no_digits.append(int(word))
+            except:
+                words_no_digits.append(word)
+        return " ".join(words_no_digits)
 
     def run_query(self, data):
         self.wb.search_google(data['question'])
