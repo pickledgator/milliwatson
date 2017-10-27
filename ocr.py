@@ -15,6 +15,8 @@ class OCR:
         self.image_name = None
         self.image_data = None
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.LEFT_ALIGN = 35
+        self.WIDTH = 955 - self.LEFT_ALIGN
         # self.question = []
 
     def load_image(self, image_name, show=False):
@@ -53,10 +55,10 @@ class OCR:
     def get_question(self):
         """Returns the detected text within the question section of the image
         """
-        question_x = 25
-        question_y = 205
-        question_w = 700
-        question_h = 280
+        question_x = self.LEFT_ALIGN
+        question_y = 270
+        question_w = self.WIDTH
+        question_h = 664 - question_y
         result = self.run_ocr_on_image_section(question_x, question_y, question_w, question_h)
         return result
 
@@ -64,30 +66,30 @@ class OCR:
     def get_answer_A(self):
         """Returns the detected text within the first answer section of the image
         """
-        answer_a_x = 55
-        answer_a_y = 510
-        answer_a_w = 650
-        answer_a_h = 120
+        answer_a_x = self.LEFT_ALIGN
+        answer_a_y = 670
+        answer_a_w = self.WIDTH
+        answer_a_h = 825-answer_a_y
         result = self.run_ocr_on_image_section(answer_a_x, answer_a_y, answer_a_w, answer_a_h)
         return result
 
     def get_answer_B(self):
         """Returns the detected text within the first answer section of the image
         """
-        answer_b_y = 641
-        answer_b_h = 760 - answer_b_y
-        answer_b_x = 55
-        answer_b_w = 650
+        answer_b_y = 843
+        answer_b_h = 996 - answer_b_y
+        answer_b_x = self.LEFT_ALIGN
+        answer_b_w = self.WIDTH
         result = self.run_ocr_on_image_section(answer_b_x, answer_b_y, answer_b_w, answer_b_h)
         return result
 
     def get_answer_C(self):
         """Returns the detected text within the first answer section of the image
         """
-        answer_c_y = 769
-        answer_c_h = 890 - answer_c_y
-        answer_c_x = 55
-        answer_c_w = 650
+        answer_c_y = 1013
+        answer_c_h = 1167 - answer_c_y
+        answer_c_x = self.LEFT_ALIGN
+        answer_c_w = self.WIDTH
         result = self.run_ocr_on_image_section(answer_c_x, answer_c_y, answer_c_w, answer_c_h)
         return result
 
@@ -101,7 +103,7 @@ class OCR:
         cv2.imshow(description, image)
         cv2.waitKey(5000)
 
-    def run_ocr_on_image_section(self,x,y,w,h,show=False):
+    def run_ocr_on_image_section(self,x,y,w,h,show=True):
         """Runs OCR on a section of image and returns the string detected
         """
         cv_cropped = self.crop(self.image_data, x, y, w, h)
@@ -129,15 +131,15 @@ def main():
     import argparse
     arg_parser = argparse.ArgumentParser(
             description="Reads a single file and splits it into question and answer options")
-    arg_parser.add_argument("--input_file", "-i", help="The input file")
+    arg_parser.add_argument("--input_file", "-i", help="The input file", default="capture_1.jpg")
     arg_parser.add_argument("--capture", "-c", action='store_true', help="Capture the screen")
     arg_parser.add_argument("--save", "-s", help="Save the image")
     args = arg_parser.parse_args()
-    
+
     ocr = OCR()
     if args.input_file:
         input_file = sanitize_file(args.input_file)
-        ocr.load_image(input_file,show=False)
+        ocr.load_image(input_file,show=True)
     if args.capture:
         filename = args.save if args.save else None
         ocr.capture_screen(bbox=(0,23,494,1000), show=True, save_filename=filename)
