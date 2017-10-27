@@ -7,12 +7,16 @@ import logging
 import select
 import tty
 import termios
+import uuid
+import json
 
 import ocr
 import query
 
 logging.basicConfig(format='[%(asctime)s](%(levelname)s) %(message)s', level=logging.INFO)
 
+kResultsFolder = "results"
+kImagesFolder = "images"
 
 class MilliWatson:
 
@@ -28,21 +32,25 @@ class MilliWatson:
                 ch = nbc.get_data()
                 if ch == 'c':  # fwd
                     self.logger.info("Capturing...")
+                    id = uuid.uuid1()
+                    filename = kImagesFolder+"/capture_{}".format(id)
                     # Setup for left snap-aligned quicktime window of iPhone 6S screen capture
-                    self.ocr.capture_screen(bbox=(0, 23, 494, 1000))
-                    if not self.processImage():
+                    self.ocr.capture_screen(bbox=(0, 23, 494, 1000), save_filename=filename)
+                    if not self.processImage(id):
                         continue
                     self.run_query(self.data)
+                    self.save_data(self.data)
 
                 time.sleep(0.01)
 
-    def processImage(self):
+    def processImage(self, id):
         try:
             self.data['question'] = self.clense(self.ocr.get_question())
             self.data['answers'] = []
             self.data['answers'].append(self.clense(self.ocr.get_answer_A()))
             self.data['answers'].append(self.clense(self.ocr.get_answer_B()))
             self.data['answers'].append(self.clense(self.ocr.get_answer_C()))
+            self.data['id'] = str(id)
             return True
         except Exception as e:
             self.logger.error("Error parsing image {}".format(e))
@@ -72,6 +80,12 @@ class MilliWatson:
 
     def show_data(self):
         print(self.data)
+
+    def save_data(self, data):
+        filename = kResultsFolder+"/results_{}.json".format(data['id'])
+        with open(filename, 'w') as fp:
+            json.dump(data, fp, indent=4)
+        self.logger.info("Saved results to {}".format(filename))
 
 
 class NonBlockingConsole(object):
