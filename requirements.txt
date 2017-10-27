@@ -6,4 +6,4 @@ selenium==3.6.0
 bs4==0.0.1
 pytesseract==0.1.7
 Pillow==4.3.0
-opencv-python
+opencv-python==3.3.0.10
