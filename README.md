@@ -13,3 +13,9 @@ MacOS:
 brew install tesseract
 pip3 install -r requirements.txt
 ```
+
+TODO:
+  * Implement a video stream method
+    * screencap polling method?
+  * Auto detect the question screen
+  * Better text detection via thresholding
