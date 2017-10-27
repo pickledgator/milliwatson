@@ -1,8 +1,10 @@
-#!/usr/env/python3
+#!/usr/bin/env python3
 from PIL import Image
 import pytesseract
 import os
 import cv2
+import pyscreenshot
+import numpy
 
 class MilliWatsonOCR:
     """OCR class that performs all cropping and OCR actions.
@@ -20,6 +22,18 @@ class MilliWatsonOCR:
         self.image_data = cv2.imread(self.image_name)
         if show:
             self.debug_image(self.image_name, self.image_data)
+
+    def capture_screen(self, bbox=None, show=False, save_filename=None):
+        """Capture screen using image as a PIL.Image
+        """
+        capture = pyscreenshot.grab(bbox)
+        # convert to opencv for pre-processing
+        self.image_data = pil2cv(capture)
+        if show:
+            self.debug_image("capture", self.image_data)
+        if save_filename:
+            cv2.imwrite(save_filename+".jpg", self.image_data)
+            print("Saved capture as {}".format(save_filename+".jpg"))
 
     def split_image(self):
         """Parses the image into four chunks.
@@ -80,8 +94,10 @@ class MilliWatsonOCR:
         return cropped
 
     def debug_image(self, description, image):
+        cv2.namedWindow(description,cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(description, 600,600)
         cv2.imshow(description, image)
-        cv2.waitKey(900)
+        cv2.waitKey(5000)
 
     def run_ocr_on_image_section(self,x,y,w,h,show=False):
         """Runs OCR on a section of image and returns the string detected
@@ -91,10 +107,17 @@ class MilliWatsonOCR:
         (thresh, cv_bw) = cv2.threshold(cv_gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
         if show:
             self.debug_image("debug",cv_bw)
-        img = Image.fromarray(cv_bw)
+        img = cv2pil(cv_bw)
         ret_string = pytesseract.image_to_string(img)
         ret_string = ret_string.replace("\n", " ")
         return ret_string
+
+
+def pil2cv(pil_img):
+    return cv2.cvtColor(numpy.array(pil_img), cv2.COLOR_RGB2BGR)
+
+def cv2pil(cv_img):
+    return Image.fromarray(cv_img)
 
 def sanitize_file(path_name):
     # Makes sure that the path has
@@ -105,12 +128,17 @@ def main():
     arg_parser = argparse.ArgumentParser(
             description="Reads a single file and splits it into question and answer options")
     arg_parser.add_argument("--input_file", "-i", help="The input file")
-
+    arg_parser.add_argument("--capture", "-c", action='store_true', help="Capture the screen")
+    arg_parser.add_argument("--save", "-s", help="Save the image")
     args = arg_parser.parse_args()
-    input_file = sanitize_file(args.input_file)
-
+    
     mW = MilliWatsonOCR()
-    mW.load_image(input_file,show=False)
+    if args.input_file:
+        input_file = sanitize_file(args.input_file)
+        mW.load_image(input_file,show=False)
+    if args.capture:
+        filename = args.save if args.save else None
+        mW.capture_screen(bbox=(0,23,494,1000), show=True, save_filename=filename)
 
     question = mW.get_question()
     print("Question: {}".format(question))
