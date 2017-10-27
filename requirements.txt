@@ -4,3 +4,6 @@ future==0.16.0
 unidecode==0.04.21
 selenium==3.6.0
 bs4==0.0.1
+pytesseract==0.1.7
+Pillow==4.3.0
+opencv-python
