@@ -6,9 +6,11 @@ import time
 import logging
 import select
 import tty
-import termios
-import uuid
 import json
+import signal
+import termios
+import threading
+import uuid
 
 import ocr
 import query
@@ -25,25 +27,56 @@ class MilliWatson:
         self.ocr = ocr.OCR()
         self.wb = query.WebQuery()
         self.data = {}
+        self.running = False
+        self.exiting = False
 
-        self.logger.info("Monitoring keyboard commands: c - capture")
+        signal.signal(signal.SIGINT, self.signal_handler)
+        signal.signal(signal.SIGTERM, self.signal_handler)
+        signal.signal(signal.SIGHUP, self.signal_handler)
+
+        self.t = threading.Thread(target=self.getInput)
+        self.t.setDaemon(True)
+        self.t.start()
+
+        # start main capture loop
+        self.run_loop()
+
+    def getInput(self):
+        self.logger.info("Monitoring keyboard commands: c - capture, a - start auto, s - stop auto")
         with NonBlockingConsole() as nbc:
-            while True:
+            while not self.exiting:
                 ch = nbc.get_data()
                 if ch == 'c':  # fwd
-                    self.logger.info("Capturing...")
-                    id = uuid.uuid1()
-                    filename = kImagesFolder+"/capture_{}".format(id)
-                    # Setup for left snap-aligned quicktime window of iPhone 6S screen capture
-                    self.ocr.capture_screen(bbox=(0, 23, 494, 1000), save_filename=filename)
-                    if not self.processImage(id):
-                        continue
-                    self.run_query(self.data)
-                    self.save_data(self.data)
-
+                    self.logger.info("Capturing one...")
+                    self.capture()
+                    self.process_capture()
+                if ch == 'a':
+                    self.logger.info("Auto capture started")
+                    self.running = True
+                if ch == 's':
+                    self.logger.info("Auto capture stopped")
+                    self.running = False
                 time.sleep(0.01)
 
-    def processImage(self, id):
+    def run_loop(self):
+        while not self.exiting:
+            if self.running:
+                self.capture()
+                # check for validity here
+            time.sleep(0.2)
+
+    def capture(self):
+        self.ocr.capture_screen(bbox=(0, 23, 494, 1000))
+
+    def process_capture(self):
+        id = uuid.uuid1()
+        if not self.run_ocr(id): return
+        self.run_query(self.data)
+        self.save_data(self.data)
+        filename = kImagesFolder+"/capture_{}".format(id)
+        self.ocr.save_image(filename)
+
+    def run_ocr(self, id):
         try:
             self.data['question'] = self.clense(self.ocr.get_question())
             self.data['answers'] = []
@@ -86,6 +119,11 @@ class MilliWatson:
         with open(filename, 'w') as fp:
             json.dump(data, fp, indent=4)
         self.logger.info("Saved results to {}".format(filename))
+
+    def signal_handler(self, s, f):
+        self.logger.info("Exiting!")
+        self.running = False
+        self.exiting = True
 
 
 class NonBlockingConsole(object):
