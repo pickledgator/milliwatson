@@ -8,15 +8,15 @@ import logging
 
 class OCR:
     """OCR class that performs all cropping and OCR actions.
-    Assumes that the image loaded is already cropped down to only the screen
+    Assumes that the image loaded is already cropped down to only the screen. Cropping boundaries
+    are currently hard-coded.
     """
     def __init__(self):
         self.image_name = None
-        self.image_data = None
+        self.cv_image_data = None
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.LEFT_ALIGN = 35
-        self.WIDTH = 955 - self.LEFT_ALIGN
-        # self.question = []
+        self.LEFT_ALIGN = 35 # All text boxes have the same left alignment
+        self.WIDTH = 955 - self.LEFT_ALIGN # All text boxes have the same right alignment
 
     def load_image(self, image_name, show=False):
         """Loads the image into memory
@@ -42,12 +42,20 @@ class OCR:
         3: Answer B
         4: Answer C
         """
-        raise NotImplementedError
+        question = self.get_question()
+        answer_a = self.get_answer_A()
+        answer_b = self.get_answer_B()
+        answer_c = self.get_answer_C()
+        return question, answer_a, answer_b, answer_c
     
     def image(self):
+        """Returns the image data
+        """
         return self.image_data
 
     def name(self):
+        """Returns the name of the image stored within the OCR class
+        """
         return self.image_name
 
     def get_question(self):
@@ -73,7 +81,7 @@ class OCR:
         return result
 
     def get_answer_B(self):
-        """Returns the detected text within the first answer section of the image
+        """Returns the detected text within the second answer section of the image
         """
         self.logger.info("Processing answer 2")
         answer_b_y = 843
@@ -84,7 +92,7 @@ class OCR:
         return result
 
     def get_answer_C(self):
-        """Returns the detected text within the first answer section of the image
+        """Returns the detected text within the third answer section of the image
         """
         self.logger.info("Processing answer 3")
         answer_c_y = 1013
@@ -97,6 +105,34 @@ class OCR:
     def save_image(self, save_filename):
         self.image_data.save(save_filename+".png")
         self.logger.info("Saved capture as {}".format(save_filename+".png"))
+        
+    def crop(self,image,x,y,w,h,show=False):
+        """Returns a cropped image
+
+        Args:
+            image: an opencv image
+            x: The minimum x pixel to be cropped
+            y: The minimum y pixel to be cropped
+            w: The width of the crop (x max - x min)
+            h: The height of the crop (y max - y min)
+
+        Returns:
+            cropped: an opencv image that has been cropped to the desired dimentions
+        """
+        cropped = image[y:y+h, x:x+w]
+        return cropped
+
+    def debug_image(self, description, image, wait=5000):
+        """Displays an image for debug purposes
+
+        Args:
+            description: string to title the display window
+            image: opencv image to display
+        """
+        cv2.namedWindow(description,cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(description, 600,600)
+        cv2.imshow(description, image)
+        cv2.waitKey(wait)
 
     def run_ocr_on_image_section(self,x,y,w,h,show=False):
         """Runs OCR on a section of image and returns the string detected
@@ -110,9 +146,10 @@ class OCR:
         ret_string = ret_string.replace("\n", " ")
         return ret_string
 
-def sanitize_file(path_name):
-    # Makes sure that the path has
-    return os.path.join(os.path.expanduser(path_name))
+def sanitize_file(file_name):
+    """ Some basic file name sanitization
+    """
+    return os.path.expanduser(file_name)
 
 def main():
     import argparse
@@ -126,22 +163,17 @@ def main():
     ocr = OCR()
     if args.input_file:
         input_file = sanitize_file(args.input_file)
-        ocr.load_image(input_file,show=True)
+        ocr.load_image(input_file,show=False)
     if args.capture:
         ocr.capture_screen(bbox=(0,23,494,1000), show=True)
     if args.save:
         ocr.save_image(args.save)
 
-    question = ocr.get_question()
+    question, answer_a_string, answer_b_string, answer_c_string = ocr.split_image()
+
     print("Question: {}".format(question))
-
-    answer_a_string = ocr.get_answer_A()
     print("Option A: {}".format(answer_a_string))
-
-    answer_b_string = ocr.get_answer_B()
     print("Option B: {}".format(answer_b_string))
-
-    answer_c_string = ocr.get_answer_C()
     print("Option C: {}".format(answer_c_string))
 
 
