@@ -23,6 +23,7 @@ class WebQuery:
         @param pages Number of pages to parse from google result 
         """
         self.inversion = False
+        # check for inversion language and mark it if found
         colored_query = query.split(" ")
         query_without_inversion = query.split(" ")
         for i, word in enumerate(colored_query):
@@ -30,6 +31,7 @@ class WebQuery:
                 if inversion in word.lower():
                     self.inversion = True
                     colored_query[i] = termcolor.colored(colored_query[i], "red")
+                    # since inversions don't help in our queries, we'll just drop them
                     query_without_inversion[i] = ""
                     
         colored_query_str = " ".join(colored_query)
@@ -41,21 +43,44 @@ class WebQuery:
         if print_results:
             print(self.results)
 
+    def get_answer_permutations(self, answer):
+        """ 
+        Finds reversed strings of the input words
+        @param answer String of a single answer
+        returns list of answers strings to search for """
+        answers = []
+        answers.append(answer)
+        if len(answer.split()) > 1:
+            words = answer.split()
+            words.reverse()
+            new_words = " ".join(words)
+            answers.append(new_words)
+            self.logger.info("Adding answer permutation for {} -> {}".format(answer, new_words))
+        return answers
 
     def answer_frequency(self, answers):
         """ 
         Test frequency of occurance of each answer against the search results
         @param answers List of strings containing each answer 
         """
+        # stage our output counts with the origin answer counts
         counts = {}
         for answer in answers:
             counts[answer] = 0
-        r = re.compile("|".join(r"\b%s\b" % w for w in answers))
-        for result in self.results:
-            count_result = collections.Counter(re.findall(r, result.description.lower()))
-            # update the running counts
-            for key, value in count_result.items():
-                counts[key] = counts[key] + value
+
+        # iterate through each answer and count the occurances in each result descriptions
+        for answer in answers:
+            # Find additonal answers to search by reversing the order of the words if there are multiple words
+            answer_perms = self.get_answer_permutations(answer)
+            # find frequency of each answer set (including any possible reversed strings)
+            for result in self.results:
+                r = re.compile("|".join(r"\b%s\b" % w for w in answer_perms))        
+                count_result = collections.Counter(re.findall(r, result.description.lower()))
+                # update the running counts
+                for _, value in count_result.items():
+                    counts[answer] = counts[answer] + value
+
+        # sort the results depending on if an inversion is detected or not
         reverse = False if self.inversion else True
         counts = sorted(counts.items(), key=operator.itemgetter(1), reverse=reverse)
         self.logger.info("=================================")
@@ -70,14 +95,17 @@ class WebQuery:
 
 if __name__ == "__main__":
     wb = WebQuery()
+    wb.search_google("final cut pro is apple's software for doing what?")
+    counts = wb.answer_frequency(["editing video", "spreadsheets", "creating music"])
+
     wb.search_google("stradivarius was famous for making what")
     counts = wb.answer_frequency(["spotify", "violins", "hearing aids"])
 
-    wb.search_google("how many leaves does a lucky clover have")
-    counts = wb.answer_frequency(["three", "four", "five"])
+    # wb.search_google("how many leaves does a lucky clover have")
+    # counts = wb.answer_frequency(["three", "four", "five"])
 
-    wb.search_google("What are the Bildungsroman genre of stories about")
-    counts = wb.answer_frequency(["roman empire", "coming of age", "unrequited love"])
+    # wb.search_google("What are the Bildungsroman genre of stories about")
+    # counts = wb.answer_frequency(["roman empire", "coming of age", "unrequited love"])
 
-    wb.search_google("what was the most downloaded iPhone app of 2016")
-    counts = wb.answer_frequency(["snapchat", "messenger", "pokemon go"])    
+    # wb.search_google("what was the most downloaded iPhone app of 2016")
+    # counts = wb.answer_frequency(["snapchat", "messenger", "pokemon go"])    
