@@ -35,17 +35,17 @@ class OCR:
         if show:
             self.image_data.show()
 
-    def split_image(self):
+    def split_image(self, show=False):
         """Parses the image into four chunks.
         1: Question section
         2: Answer A
         3: Answer B
         4: Answer C
         """
-        question = self.get_question()
-        answer_a = self.get_answer_A()
-        answer_b = self.get_answer_B()
-        answer_c = self.get_answer_C()
+        question = self.get_question(show)
+        answer_a = self.get_answer_A(show)
+        answer_b = self.get_answer_B(show)
+        answer_c = self.get_answer_C(show)
         return question, answer_a, answer_b, answer_c
     
     def image(self):
@@ -58,7 +58,7 @@ class OCR:
         """
         return self.image_name
 
-    def get_question(self):
+    def get_question(self, show=False):
         """Returns the detected text within the question section of the image
         """
         self.logger.info("Processing question")
@@ -66,10 +66,10 @@ class OCR:
         question_y = 270
         question_w = self.WIDTH
         question_h = 664 - question_y
-        result = self.run_ocr_on_image_section(question_x, question_y, question_w, question_h, False)
+        result = self.run_ocr_on_image_section(question_x, question_y, question_w, question_h, show)
         return result
 
-    def get_answer_A(self):
+    def get_answer_A(self, show=False):
         """Returns the detected text within the first answer section of the image
         """
         self.logger.info("Processing answer 1")
@@ -77,10 +77,10 @@ class OCR:
         answer_a_y = 670
         answer_a_w = self.WIDTH
         answer_a_h = 825-answer_a_y
-        result = self.run_ocr_on_image_section(answer_a_x, answer_a_y, answer_a_w, answer_a_h, False)
+        result = self.run_ocr_on_image_section(answer_a_x, answer_a_y, answer_a_w, answer_a_h, show)
         return result
 
-    def get_answer_B(self):
+    def get_answer_B(self, show=False):
         """Returns the detected text within the second answer section of the image
         """
         self.logger.info("Processing answer 2")
@@ -88,10 +88,10 @@ class OCR:
         answer_b_h = 996 - answer_b_y
         answer_b_x = self.LEFT_ALIGN
         answer_b_w = self.WIDTH
-        result = self.run_ocr_on_image_section(answer_b_x, answer_b_y, answer_b_w, answer_b_h, False)
+        result = self.run_ocr_on_image_section(answer_b_x, answer_b_y, answer_b_w, answer_b_h, show)
         return result
 
-    def get_answer_C(self):
+    def get_answer_C(self, show=False):
         """Returns the detected text within the third answer section of the image
         """
         self.logger.info("Processing answer 3")
@@ -99,7 +99,7 @@ class OCR:
         answer_c_h = 1167 - answer_c_y
         answer_c_x = self.LEFT_ALIGN
         answer_c_w = self.WIDTH
-        result = self.run_ocr_on_image_section(answer_c_x, answer_c_y, answer_c_w, answer_c_h, False)
+        result = self.run_ocr_on_image_section(answer_c_x, answer_c_y, answer_c_w, answer_c_h, show)
         return result
 
     def save_image(self, save_filename):
@@ -158,6 +158,7 @@ def main():
     arg_parser.add_argument("--input_file", "-i", help="The input file", default="capture_1.jpg")
     arg_parser.add_argument("--capture", "-c", action='store_true', help="Capture the screen")
     arg_parser.add_argument("--save", "-s", help="Save the image")
+    arg_parser.add_argument("--display", "-d", action='store_true', help="Display the image")
     args = arg_parser.parse_args()
 
     ocr = OCR()
@@ -169,7 +170,7 @@ def main():
     if args.save:
         ocr.save_image(args.save)
 
-    question, answer_a_string, answer_b_string, answer_c_string = ocr.split_image()
+    question, answer_a_string, answer_b_string, answer_c_string = ocr.split_image(args.display)
 
     print("Question: {}".format(question))
     print("Option A: {}".format(answer_a_string))

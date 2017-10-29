@@ -8,3 +8,4 @@ pytesseract==0.1.7
 Pillow==4.3.0
 opencv-python==3.3.0.10
 simplejson==3.11.1
+termcolor==1.1.0

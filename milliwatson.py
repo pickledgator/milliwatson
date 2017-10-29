@@ -9,6 +9,7 @@ import tty
 import json
 import signal
 import termios
+import termcolor
 import threading
 import uuid
 
