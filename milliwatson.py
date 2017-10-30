@@ -92,7 +92,7 @@ class MilliWatson:
 
     def clense(self, in_string):
         # remove hyphens followed by spaces
-        in_string = in_string.replace("- ","")
+        in_string = in_string.replace("-","")
         # remove special characters
         in_string = in_string.replace("|","I")
         # convert all lower
