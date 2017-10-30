@@ -17,7 +17,7 @@ class WebQuery:
         self.logger = logging.getLogger(self.__class__.__name__)
         self.inversion = False
 
-    def search_google(self, query, pages=5, print_results=False):
+    def search_google(self, query, pages=3, print_results=False):
         """ 
         Query google for search results 
         @param query String to send to google
@@ -40,10 +40,15 @@ class WebQuery:
         query_without_inversion_str = " ".join(query_without_inversion)
         self.logger.info("=================================")
         self.logger.info("Query: \"{}\"".format(colored_query_str))
-        self.results = google.search(query_without_inversion_str, pages)
+        try:
+            self.results = google.search(query_without_inversion_str, pages)
+        except Exception as e:
+            self.logger.error("Caught exception in google query: {}".format(e))
+            return False
         self.logger.info("Got {} results from the googz".format(len(self.results)))
         if print_results:
             print(self.results)
+        return True
 
     def get_answer_permutations(self, answer):
         """ 
@@ -59,6 +64,22 @@ class WebQuery:
             answers.append(new_words)
             self.logger.info("Adding answer permutation for {} -> {}".format(answer, new_words))
         return answers
+
+    def check_counts_failure(self, counts):
+        """
+        Check if we got all zeros, if so, spawn a web browser for last ditch effort
+        @param counts List of pairs containing each answer and the count frequency found in query
+        """
+        all_zeros = True
+        for c in counts:
+            if c[1] != 0:
+                all_zeros = False
+                break
+        if all_zeros:
+            self.logger.info("Found all zeros, spawning chrome")
+            query_split = self.query.split()
+            query_pluses = "+".join(query_split)
+            webbrowser.open("https://www.google.com/search?q={}".format(query_pluses))
 
     def answer_frequency(self, answers):
         """ 
@@ -93,18 +114,7 @@ class WebQuery:
                 self.logger.info(termcolor.colored("{} : {}".format(c[0],c[1]), "red"))
         self.logger.info("=================================")
         
-        # check if we got all zeros, if so, spawn a web browser for last ditch effort
-        all_zeros = True
-        for c in counts:
-            if c[1] != 0:
-                all_zeros = False
-                break
-        if all_zeros:
-            self.logger.info("Found all zeros, spawning chrome")
-            query_split = self.query.split()
-            query_pluses = "+".join(query_split)
-            webbrowser.open("https://www.google.com/search?q={}".format(query_pluses))
-
+        self.check_counts_failure(counts)
         return counts
 
 

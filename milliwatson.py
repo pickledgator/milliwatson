@@ -71,11 +71,12 @@ class MilliWatson:
 
     def process_capture(self):
         id = uuid.uuid1()
-        if not self.run_ocr(id): return
-        self.run_query(self.data)
+        if not self.run_ocr(id): return False
+        if not self.run_query(self.data): return False
         self.save_data(self.data)
         filename = kImagesFolder+"/capture_{}".format(id)
         self.ocr.save_image(filename)
+        return True
 
     def run_ocr(self, id):
         try:
@@ -108,9 +109,11 @@ class MilliWatson:
         return " ".join(words_no_digits)
 
     def run_query(self, data):
-        self.wb.search_google(data['question'])
+        if not self.wb.search_google(data['question']):
+            return False
         counts = self.wb.answer_frequency(data['answers'])
         self.data['results'] = counts
+        return True
 
     def show_data(self):
         print(self.data)
