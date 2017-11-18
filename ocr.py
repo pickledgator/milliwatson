@@ -9,14 +9,15 @@ import logging
 class OCR:
     """OCR class that performs all cropping and OCR actions.
     Assumes that the image loaded is already cropped down to only the screen. Cropping boundaries
-    are currently hard-coded.
+    are currently hard-coded for use on an iPhoneX
     """
     def __init__(self):
         self.image_name = None
         self.cv_image_data = None
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.LEFT_ALIGN = 35 # All text boxes have the same left alignment
-        self.WIDTH = 955 - self.LEFT_ALIGN # All text boxes have the same right alignment
+        self.LEFT_ALIGN = 27 # All text boxes have the same left alignment
+        self.WIDTH = 785 - self.LEFT_ALIGN # All text boxes have the same right alignment
+        self.ANSWER_HEIGHT = 120 # All answer boxes have the same height
 
     def load_image(self, image_name, show=False):
         """Loads the image into memory
@@ -47,7 +48,7 @@ class OCR:
         answer_b = self.get_answer_B(show)
         answer_c = self.get_answer_C(show)
         return question, answer_a, answer_b, answer_c
-    
+
     def image(self):
         """Returns the image data
         """
@@ -65,7 +66,7 @@ class OCR:
         question_x = self.LEFT_ALIGN
         question_y = 270
         question_w = self.WIDTH
-        question_h = 664 - question_y
+        question_h = 700 - question_y
         result = self.run_ocr_on_image_section(question_x, question_y, question_w, question_h, show)
         return result
 
@@ -74,9 +75,9 @@ class OCR:
         """
         self.logger.info("Processing answer 1")
         answer_a_x = self.LEFT_ALIGN
-        answer_a_y = 670
+        answer_a_y = 705
         answer_a_w = self.WIDTH
-        answer_a_h = 825-answer_a_y
+        answer_a_h = self.ANSWER_HEIGHT
         result = self.run_ocr_on_image_section(answer_a_x, answer_a_y, answer_a_w, answer_a_h, show)
         return result
 
@@ -84,8 +85,8 @@ class OCR:
         """Returns the detected text within the second answer section of the image
         """
         self.logger.info("Processing answer 2")
-        answer_b_y = 843
-        answer_b_h = 996 - answer_b_y
+        answer_b_y = 845
+        answer_b_h = self.ANSWER_HEIGHT
         answer_b_x = self.LEFT_ALIGN
         answer_b_w = self.WIDTH
         result = self.run_ocr_on_image_section(answer_b_x, answer_b_y, answer_b_w, answer_b_h, show)
@@ -95,8 +96,8 @@ class OCR:
         """Returns the detected text within the third answer section of the image
         """
         self.logger.info("Processing answer 3")
-        answer_c_y = 1013
-        answer_c_h = 1167 - answer_c_y
+        answer_c_y = 985
+        answer_c_h = self.ANSWER_HEIGHT
         answer_c_x = self.LEFT_ALIGN
         answer_c_w = self.WIDTH
         result = self.run_ocr_on_image_section(answer_c_x, answer_c_y, answer_c_w, answer_c_h, show)
@@ -105,7 +106,7 @@ class OCR:
     def save_image(self, save_filename):
         self.image_data.save(save_filename+".png")
         self.logger.info("Saved capture as {}".format(save_filename+".png"))
-        
+
     def crop(self,image,x,y,w,h,show=False):
         """Returns a cropped image
 
