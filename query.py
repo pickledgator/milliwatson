@@ -4,15 +4,17 @@ from google import google
 import logging
 import operator
 import re
+import termcolor
 
 logging.basicConfig(format='[%(asctime)s](%(levelname)s) %(message)s', level=logging.INFO)
-
+kInversionWords = ["not", "least", "non"]
 
 class WebQuery:
 
     def __init__(self):
         self.results = []
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.inversion = False
 
     def search_google(self, query, pages=3, print_results=False):
         """ 
@@ -20,8 +22,21 @@ class WebQuery:
         @param query String to send to google
         @param pages Number of pages to parse from google result 
         """
-        self.logger.info("Query: \"{}\"".format(query))
-        self.results = google.search(query, pages)
+        self.inversion = False
+        colored_query = query.split(" ")
+        query_without_inversion = query.split(" ")
+        for i, word in enumerate(colored_query):
+            for inversion in kInversionWords:
+                if inversion in word.lower():
+                    self.inversion = True
+                    colored_query[i] = termcolor.colored(colored_query[i], "red")
+                    query_without_inversion[i] = ""
+                    
+        colored_query_str = " ".join(colored_query)
+        query_without_inversion_str = " ".join(query_without_inversion)
+        self.logger.info("=================================")
+        self.logger.info("Query: \"{}\"".format(colored_query_str))
+        self.results = google.search(query_without_inversion_str, pages)
         self.logger.info("Got {} results from the googz".format(len(self.results)))
         if print_results:
             print(self.results)
@@ -41,13 +56,14 @@ class WebQuery:
             # update the running counts
             for key, value in count_result.items():
                 counts[key] = counts[key] + value
-        counts = sorted(counts.items(), key=operator.itemgetter(1), reverse=True)
+        reverse = False if self.inversion else True
+        counts = sorted(counts.items(), key=operator.itemgetter(1), reverse=reverse)
         self.logger.info("=================================")
         for i,c in enumerate(counts):
             if i==0:
-                self.logger.info("{} : {} <---------------".format(c[0],c[1]))
+                self.logger.info(termcolor.colored("{} : {} <---------------".format(c[0],c[1]), "green"))
             else:
-                self.logger.info("{} : {}".format(c[0],c[1]))
+                self.logger.info(termcolor.colored("{} : {}".format(c[0],c[1]), "red"))
         self.logger.info("=================================")
         return counts
 
