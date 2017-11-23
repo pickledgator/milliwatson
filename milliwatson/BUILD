@@ -1,5 +1,4 @@
-# visibility("//visibility:public")
-load("@my_deps//:requirements.bzl", "requirement")
+load("@milliwatson_deps//:requirements.bzl", "requirement")
 
 py_binary(
     name = "ocr",
