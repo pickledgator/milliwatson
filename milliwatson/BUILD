@@ -4,30 +4,30 @@ py_binary(
     name = "ocr",
     srcs = ["ocr.py"],
     deps = [
-	    requirement("pytesseract"),
-      requirement("Pillow"),
-      requirement("opencv-python"),
-    ]
+        requirement("pytesseract"),
+        requirement("Pillow"),
+        requirement("opencv-python"),
+    ],
 )
 
 py_binary(
     name = "query",
     srcs = ["query.py"],
     deps = [
-      requirement("google"),
-      requirement("termcolor")
+        requirement("google"),
+        requirement("termcolor"),
     ],
 )
 
 py_binary(
     name = "milliwatson",
     srcs = ["milliwatson.py"],
+    default_python_version = "PY3",
     deps = [
-      ":ocr",
-      ":query",
-      requirement("simplejson"),
-      requirement("future"),
-      requirement("google"),
+        ":ocr",
+        ":query",
+        requirement("simplejson"),
+        requirement("future"),
+        requirement("google"),
     ],
-    default_python_version = "PY3"
 )
