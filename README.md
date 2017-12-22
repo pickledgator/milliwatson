@@ -1,7 +1,7 @@
 # milliwatson
 The newest pint-sized trivia super star
 
-# To set up:
+## To set up:
 Linux:
 ```bash
 sudo apt-get install tesseract -y
@@ -14,7 +14,7 @@ brew install tesseract
 pip3 install -r requirements.txt
 ```
 
-# Running
+## Running
 * Connect iPhone to mac via USB
 * Open Quicktime, select File->New Movie Recording
 * Down arrow next to record button, select Camera: iPhone
@@ -22,8 +22,17 @@ pip3 install -r requirements.txt
 * Run script: ```python3 ./milliwatson.py```
 * Use ```c``` to capture
 
-TODO:
+## TODO:
   * Implement a video stream method
     * screencap polling method?
   * Auto detect the question screen
   * Better text detection via thresholding
+
+## Troubleshooting
+### Xcode version must be specified to use an Apple CROSSTOOL
+```shell
+bazel clean --expunge
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+sudo xcodebuild -license
+bazel clean --expunge
+```
