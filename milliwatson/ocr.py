@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from PIL import Image
+from PIL import ImageDraw
 import pytesseract
 import os
 import cv2
@@ -23,13 +24,18 @@ class OCR:
         # All answer boxes have the same height
         self.ANSWER_HEIGHT = 120
 
-    def load_image(self, image_name, show=False):
+    def load_image(self, image_name, show=True):
         """Loads the image into memory
         """
         self.image_name = image_name
         self.image_data = Image.open(image_name)
         if show:
             self.image_data.show()
+
+    def draw_bounds(self):
+        image_draw = ImageDraw(self.image_data)
+        image_draw.rectangle([10,10,10,10])
+        image_draw.show()
 
     def capture_screen(self, bbox=None, show=False):
         """Capture screen and save image as a PIL.Image
@@ -180,7 +186,7 @@ def main():
     ocr = OCR()
     if args.input_file:
         input_file = sanitize_file(args.input_file)
-        ocr.load_image(input_file, show=False)
+        ocr.load_image(input_file, show=True)
     if args.capture:
         ocr.capture_screen(bbox=(0, 23, 494, 1000), show=True)
     if args.save:
