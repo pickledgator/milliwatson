@@ -3,6 +3,7 @@ load("@milliwatson_deps//:requirements.bzl", "requirement")
 py_binary(
     name = "ocr",
     srcs = ["ocr.py"],
+    default_python_version = "PY3",
     deps = [
         requirement("pytesseract"),
         requirement("Pillow"),
@@ -13,8 +14,10 @@ py_binary(
 py_binary(
     name = "query",
     srcs = ["query.py"],
+    default_python_version = "PY3",
     deps = [
-        requirement("google"),
+        requirement("Google-Search-API"),
+        # "//external:google_search_api",
         requirement("termcolor"),
     ],
 )
@@ -28,6 +31,6 @@ py_binary(
         ":query",
         requirement("simplejson"),
         requirement("future"),
-        requirement("google"),
+        # requirement("google"),
     ],
 )
