@@ -3,3 +3,4 @@ __pycache__
 images/
 results/
 tmp.png
+bazel-*
