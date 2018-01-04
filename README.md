@@ -30,7 +30,7 @@ bazel build milliwatson
 * Down arrow next to record button, select Camera: iPhone
 * Left snap quick time window to left side of desktop
 * Run:
-  * Linux: ```./bazel-out/bin/milliwatson/milliwatson```
+  * Linux: ```./bazel-out/k8-py3-fastbuild/bin/milliwatson/milliwatson```
   * Mac: ```./bazel-out/darwin-py3-fastbuild/bin/milliwatson/milliwatson```
 * Use ```c``` to capture
 
