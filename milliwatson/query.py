@@ -45,8 +45,7 @@ class WebQuery:
         except Exception as e:
             self.logger.error("Caught exception in google query: {}".format(e))
             return False
-        # print(dir(self.results))
-        # self.logger.info("Got {} results from the googz".format(len(self.results)))
+        self.logger.info("Got {} results from the googz".format(len(self.results)))
         if print_results:
             print(self.results)
         return True
