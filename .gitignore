@@ -4,3 +4,4 @@ images/
 results/
 tmp.png
 bazel-*
+env/
