@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import collections
-from google import google
+from google import search
 import logging
 import operator
 import re
@@ -18,10 +18,10 @@ class WebQuery:
         self.inversion = False
 
     def search_google(self, query, pages=3, print_results=False):
-        """ 
-        Query google for search results 
+        """
+        Query google for search results
         @param query String to send to google
-        @param pages Number of pages to parse from google result 
+        @param pages Number of pages to parse from google result
         """
         self.query = query
         self.inversion = False
@@ -35,13 +35,13 @@ class WebQuery:
                     colored_query[i] = termcolor.colored(colored_query[i], "red")
                     # since inversions don't help in our queries, we'll just drop them
                     query_without_inversion[i] = ""
-                    
+
         colored_query_str = " ".join(colored_query)
         query_without_inversion_str = " ".join(query_without_inversion)
         self.logger.info("=================================")
         self.logger.info("Query: \"{}\"".format(colored_query_str))
         try:
-            self.results = google.search(query_without_inversion_str, pages)
+            self.results = search(query_without_inversion_str, pages)
         except Exception as e:
             self.logger.error("Caught exception in google query: {}".format(e))
             return False
@@ -51,7 +51,7 @@ class WebQuery:
         return True
 
     def get_answer_permutations(self, answer):
-        """ 
+        """
         Finds reversed strings of the input words
         @param answer String of a single answer
         returns list of answers strings to search for """
@@ -82,9 +82,9 @@ class WebQuery:
             webbrowser.open("https://www.google.com/search?q={}".format(query_pluses))
 
     def answer_frequency(self, answers):
-        """ 
+        """
         Test frequency of occurance of each answer against the search results
-        @param answers List of strings containing each answer 
+        @param answers List of strings containing each answer
         """
         # stage our output counts with the origin answer counts
         counts = {}
@@ -97,7 +97,7 @@ class WebQuery:
             answer_perms = self.get_answer_permutations(answer)
             # find frequency of each answer set (including any possible reversed strings)
             for result in self.results:
-                r = re.compile("|".join(r"\b%s\b" % w for w in answer_perms))        
+                r = re.compile("|".join(r"\b%s\b" % w for w in answer_perms))
                 count_result = collections.Counter(re.findall(r, result.description.lower()))
                 # update the running counts
                 for _, value in count_result.items():
@@ -113,7 +113,7 @@ class WebQuery:
             else:
                 self.logger.info(termcolor.colored("{} : {}".format(c[0],c[1]), "red"))
         self.logger.info("=================================")
-        
+
         self.check_counts_failure(counts)
         return counts
 
@@ -133,4 +133,4 @@ if __name__ == "__main__":
     # counts = wb.answer_frequency(["roman empire", "coming of age", "unrequited love"])
 
     # wb.search_google("what was the most downloaded iPhone app of 2016")
-    # counts = wb.answer_frequency(["snapchat", "messenger", "pokemon go"])    
+    # counts = wb.answer_frequency(["snapchat", "messenger", "pokemon go"])

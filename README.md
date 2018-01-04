@@ -1,17 +1,27 @@
 # milliwatson
 The newest pint-sized trivia super star
 
-## To set up:
+## Issue Tracking / Feature Requests
+https://waffle.io/pickledgator/milliwatson
+
+## Setup
 Linux:
+* Install bazel (https://docs.bazel.build/versions/master/install-ubuntu.html)
 ```bash
+pip3 install virtualenv
+virtualenv -p python3 env
+source env/bin/activate
 sudo apt-get install tesseract -y
-pip3 install -r requirements.txt
+bazel build milliwatson
 ```
 
 MacOS:
 ```bash
-brew install tesseract
-pip3 install -r requirements.txt
+brew install tesseract bazel
+pip3 install virtualenv
+virtualenv -p python3 env
+source env/bin/activate
+bazel build milliwatson
 ```
 
 ## Running
@@ -19,7 +29,9 @@ pip3 install -r requirements.txt
 * Open Quicktime, select File->New Movie Recording
 * Down arrow next to record button, select Camera: iPhone
 * Left snap quick time window to left side of desktop
-* Run script: ```python3 ./milliwatson.py```
+* Run:
+  * Linux: ```./bazel-out/k8-py3-fastbuild/bin/milliwatson/milliwatson```
+  * Mac: ```./bazel-out/darwin-py3-fastbuild/bin/milliwatson/milliwatson```
 * Use ```c``` to capture
 
 ## TODO:

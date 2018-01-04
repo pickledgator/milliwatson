@@ -156,7 +156,7 @@ def main():
     import argparse
     arg_parser = argparse.ArgumentParser(
             description="Reads a single file and splits it into question and answer options")
-    arg_parser.add_argument("--input_file", "-i", help="The input file", default="capture_1.jpg")
+    arg_parser.add_argument("--input_file", "-i", help="The input file", default="capture_1.png")
     arg_parser.add_argument("--capture", "-c", action='store_true', help="Capture the screen")
     arg_parser.add_argument("--save", "-s", help="Save the image")
     arg_parser.add_argument("--display", "-d", action='store_true', help="Display the image")
