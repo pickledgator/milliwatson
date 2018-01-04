@@ -17,7 +17,6 @@ py_binary(
     default_python_version = "PY3",
     deps = [
         requirement("Google-Search-API"),
-        # "//external:google_search_api",
         requirement("termcolor"),
     ],
 )
@@ -31,6 +30,5 @@ py_binary(
         ":query",
         requirement("simplejson"),
         requirement("future"),
-        # requirement("google"),
     ],
 )
