@@ -34,11 +34,8 @@ bazel build milliwatson
   * Mac: ```./bazel-out/darwin-py3-fastbuild/bin/milliwatson/milliwatson```
 * Use ```c``` to capture
 
-## TODO:
-  * Implement a video stream method
-    * screencap polling method?
-  * Auto detect the question screen
-  * Better text detection via thresholding
+# Notice
+Usage of this application during live gameplay is in violation of the Terms of Service of HQ Trivia. The authors and contributors of this project assume no responsibility for improper use. The purpose of this application is for educational and offline purposes only.
 
 ## Troubleshooting
 ### Xcode version must be specified to use an Apple CROSSTOOL
