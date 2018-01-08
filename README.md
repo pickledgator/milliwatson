@@ -35,7 +35,7 @@ bazel build milliwatson
 * Use ```c``` to capture
 
 ## Notice
-Usage of this application during live gameplay is in violation of the Terms of Service of HQ Trivia. The authors and contributors of this project assume no responsibility for improper use. The purpose of this application is for educational and offline purposes only.
+Usage of this project is in violation of the Terms of Service of specific iOS trivia applications. The authors and contributors of this project assume no responsibility for improper use. The purpose of this application is for educational and offline purposes only.
 
 ## Troubleshooting
 ### Xcode version must be specified to use an Apple CROSSTOOL
