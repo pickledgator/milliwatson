@@ -1,5 +1,5 @@
 # milliwatson
-The newest pint-sized HQTrivia super star
+The newest pint-sized trivia super star
 
 ## Issue Tracking / Feature Requests
 <a href="https://waffle.io/pickledgator/milliwatson" target="_blank">https://waffle.io/pickledgator/milliwatson</a>
