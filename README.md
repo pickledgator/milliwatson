@@ -2,7 +2,7 @@
 The newest pint-sized trivia super star
 
 ## Issue Tracking / Feature Requests
-https://waffle.io/pickledgator/milliwatson
+<a href="https://waffle.io/pickledgator/milliwatson" target="_blank">https://waffle.io/pickledgator/milliwatson</a>
 
 ## Setup
 Linux:
