@@ -14,8 +14,7 @@ import uuid
 import ocr
 import query
 
-logging.basicConfig(
-    format='[%(asctime)s](%(levelname)s) %(message)s', level=logging.INFO)
+logging.basicConfig(format='(%(levelname)s) %(message)s', level=logging.INFO)
 
 kResultsFolder = "results"
 kImagesFolder = "images"
