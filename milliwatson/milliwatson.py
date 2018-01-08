@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import os
 import sys
 import time
 import logging
@@ -9,17 +8,17 @@ import tty
 import json
 import signal
 import termios
-import termcolor
 import threading
 import uuid
 
 import ocr
 import query
 
-logging.basicConfig(format='[%(asctime)s](%(levelname)s) %(message)s', level=logging.INFO)
+logging.basicConfig(format='(%(levelname)s) %(message)s', level=logging.INFO)
 
 kResultsFolder = "results"
 kImagesFolder = "images"
+
 
 class MilliWatson:
 
@@ -43,7 +42,7 @@ class MilliWatson:
         self.run_loop()
 
     def getInput(self):
-        self.logger.info("Monitoring keyboard commands: c - capture, a - start auto, s - stop auto")
+        self.logger.info("Monitoring keyboard commands: c - capture")
         with NonBlockingConsole() as nbc:
             while not self.exiting:
                 ch = nbc.get_data()
@@ -72,10 +71,12 @@ class MilliWatson:
 
     def process_capture(self):
         id = uuid.uuid1()
-        if not self.run_ocr(id): return False
-        if not self.run_query(self.data): return False
+        if not self.run_ocr(id):
+            return False
+        if not self.run_query(self.data):
+            return False
         self.save_data(self.data)
-        filename = kImagesFolder+"/capture_{}".format(id)
+        filename = kImagesFolder + "/capture_{}".format(id)
         self.ocr.save_image(filename)
         return True
 
@@ -94,9 +95,9 @@ class MilliWatson:
 
     def clense(self, in_string):
         # remove hyphens followed by spaces
-        in_string = in_string.replace("-","")
+        in_string = in_string.replace("-", "")
         # remove special characters
-        in_string = in_string.replace("|","I")
+        in_string = in_string.replace("|", "I")
         # convert all lower
         in_string = in_string.lower()
         # convert digits to text
@@ -105,7 +106,7 @@ class MilliWatson:
         for word in words:
             try:
                 words_no_digits.append(int(word))
-            except:
+            except Exception as e:
                 words_no_digits.append(word)
         return " ".join(words_no_digits)
 
@@ -120,7 +121,7 @@ class MilliWatson:
         print(self.data)
 
     def save_data(self, data):
-        filename = kResultsFolder+"/results_{}.json".format(data['id'])
+        filename = kResultsFolder + "/results_{}.json".format(data['id'])
         with open(filename, 'w') as fp:
             json.dump(data, fp, indent=4)
         self.logger.info("Saved results to {}".format(filename))
@@ -145,6 +146,7 @@ class NonBlockingConsole(object):
         if select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], []):
             return sys.stdin.read(1)
         return False
+
 
 if __name__ == "__main__":
     mW = MilliWatson()
