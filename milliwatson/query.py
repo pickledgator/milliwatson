@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import collections
-from google import search
+from google import google
 import logging
 import operator
 import re
@@ -41,7 +41,7 @@ class WebQuery:
         self.logger.info("=================================")
         self.logger.info("Query: \"{}\"".format(colored_query_str))
         try:
-            self.results = search(query_without_inversion_str, pages)
+            self.results = google.search(query_without_inversion_str, pages)
         except Exception as e:
             self.logger.error("Caught exception in google query: {}".format(e))
             return False
