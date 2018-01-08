@@ -34,7 +34,7 @@ bazel build milliwatson
   * Mac: ```./bazel-out/darwin-py3-fastbuild/bin/milliwatson/milliwatson```
 * Use ```c``` to capture
 
-# Notice
+## Notice
 Usage of this application during live gameplay is in violation of the Terms of Service of HQ Trivia. The authors and contributors of this project assume no responsibility for improper use. The purpose of this application is for educational and offline purposes only.
 
 ## Troubleshooting
