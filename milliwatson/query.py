@@ -6,6 +6,7 @@ import operator
 import re
 import termcolor
 import webbrowser
+import wikipedia
 
 logging.basicConfig(format='(%(levelname)s) %(message)s', level=logging.INFO)
 kInversionWords = ["not"]
@@ -55,6 +56,9 @@ class WebQuery:
         if print_results:
             print(self.results)
         return True
+
+    def search_wikipedia(self, phrase):
+        print(wikipedia.suggest(phrase))
 
     def get_answer_permutations(self, answer):
         """Finds reversed strings of the input words
@@ -141,18 +145,20 @@ class WebQuery:
 
 if __name__ == "__main__":
     wb = WebQuery()
-    wb.search_google("final cut pro is apple's software for doing what?")
-    counts = wb.answer_frequency(
-        ["editing video", "spreadsheets", "creating music"])
+    # wb.search_google("final cut pro is apple's software for doing what?")
+    # counts = wb.answer_frequency(
+    #     ["editing video", "spreadsheets", "creating music"])
 
-    wb.search_google("stradivarius was famous for making what")
-    counts = wb.answer_frequency(["spotify", "violins", "hearing aids"])
+    # wb.search_google("stradivarius was famous for making what")
+    # counts = wb.answer_frequency(["spotify", "violins", "hearing aids"])
 
-    wb.search_google(
-        "L.A. ofﬁcials attended the 1956 World Series with hopes of luring\
-         which team to the West Coast?")
-    counts = wb.answer_frequency(
-        ["St. Louis Browns", "New York Giants", "Washington Senators"])
+    # wb.search_google(
+    #     "L.A. officials attended the 1956 World Series with hopes of luring\
+    #      which team to the West Coast?")
+    # counts = wb.answer_frequency(
+    #     ["St. Louis Browns", "New York Giants", "Washington Senators"])
+
+    wb.search_wikipedia("stradivarius was famous for making what")
 
     # wb.search_google("What are the Bildungsroman genre of stories about")
     # counts = wb.answer_frequency(

@@ -9,4 +9,5 @@ Pillow==4.3.0
 opencv-python==3.3.0.10
 simplejson==3.11.1
 termcolor==1.1.0
+wikipedia==1.4.0
 git+https://github.com/abenassi/Google-Search-API/

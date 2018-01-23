@@ -18,6 +18,7 @@ py_binary(
     deps = [
         requirement("Google-Search-API"),
         requirement("termcolor"),
+        requirement("wikipedia"),
     ],
 )
 
