@@ -1,0 +1,13 @@
+[DEFAULT]
+capture_width = 1120
+capture_height = 2222
+horizontal_padding = 84
+vertical_padding = 68
+question_top_margin = 350
+question_left_margin = 50
+question_right_margin = 50
+question_height = 420
+answer_first_top_margin = 45
+answer_height = 163
+answer_left_margin = 50
+answer_right_margin = 50
