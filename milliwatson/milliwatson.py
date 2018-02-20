@@ -119,7 +119,7 @@ class MilliWatson:
     def run_query(self, data):
         if not self.wb.search_google(data['question']):
             return False
-        counts = self.wb.answer_frequency(data['answers'])
+        counts = self.wb.answer_frequency_fuzzy(data['answers'])
         self.data['results'] = counts
         return True
 
