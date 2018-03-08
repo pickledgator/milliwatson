@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import collections
+from fuzzywuzzy import fuzz
 from google import google
 import logging
 import operator
 import re
+import requests
 import termcolor
 import webbrowser
 
@@ -55,6 +57,19 @@ class WebQuery:
         if print_results:
             print(self.results)
         return True
+
+    # def search_bing(self, query):
+    #     url = 'https://api.cognitive.microsoft.com/bing/v7.0/composite'
+    #     # query string parameters
+    #     payload = {'q': query}
+    #     # custom headers
+    #     headers = {'Ocp-Apim-Subscription-Key': '362ffe563af5458f8818a32a1a165d1b'}
+    #     # make GET request
+    #     r = requests.get(url, params=payload, headers=headers)
+    #     # get JSON response
+    #     j=r.json()
+    #     pp = pprint.PrettyPrinter(indent=4)
+    #     pp.pprint(j)
 
     def get_answer_permutations(self, answer):
         """Finds reversed strings of the input words
@@ -126,6 +141,45 @@ class WebQuery:
         counts = sorted(counts.items(), key=operator.itemgetter(1),
                         reverse=reverse)
         self.logger.info("=================================")
+        self.logger.info("Permutation match results")
+        for i, c in enumerate(counts):
+            if i == 0:
+                self.logger.info(termcolor.colored(
+                    "{} : {} <---------------".format(c[0], c[1]), "green"))
+            else:
+                self.logger.info(termcolor.colored(
+                    "{} : {}".format(c[0], c[1]), "red"))
+        self.logger.info("=================================")
+
+        self.check_counts_failure(counts)
+        return counts
+
+    def answer_frequency_fuzzy(self, answers):
+        """Test probability (0-100) of match of each answer within each description set
+        Args:
+            answers (List): of strings containing each answer
+        Returns:
+            (OrderedDict): Dictionary of results, sorted by most probable
+        """
+        # stage our output counts with the origin answer counts
+        counts = {}
+        for answer in answers:
+            counts[answer] = 0
+
+        # iterate through each answer and count the occurances in each result
+        # description test
+        for answer in answers:
+            # find frequency of each answer set using fuzzy techniques
+            for result in self.results:
+                val = fuzz.token_set_ratio(answer, result.description.lower())
+                counts[answer] = counts[answer] + val
+
+        # sort the results depending on if an inversion is detected or not
+        reverse = False if self.inversion else True
+        counts = sorted(counts.items(), key=operator.itemgetter(1),
+                        reverse=reverse)
+        self.logger.info("=================================")
+        self.logger.info("Fuzzy match results")
         for i, c in enumerate(counts):
             if i == 0:
                 self.logger.info(termcolor.colored(
@@ -141,22 +195,27 @@ class WebQuery:
 
 if __name__ == "__main__":
     wb = WebQuery()
-    wb.search_google("final cut pro is apple's software for doing what?")
-    counts = wb.answer_frequency(
-        ["editing video", "spreadsheets", "creating music"])
+    # wb.search_google("final cut pro is apple's software for doing what?")
+    # counts = wb.answer_frequency(
+    #     ["editing video", "spreadsheets", "creating music"])
 
     wb.search_google("stradivarius was famous for making what")
     counts = wb.answer_frequency(["spotify", "violins", "hearing aids"])
+    counts = wb.answer_frequency_fuzzy(["spotify", "violins", "hearing aids"])
 
-    wb.search_google(
-        "L.A. ofﬁcials attended the 1956 World Series with hopes of luring\
-         which team to the West Coast?")
-    counts = wb.answer_frequency(
-        ["St. Louis Browns", "New York Giants", "Washington Senators"])
-
-    # wb.search_google("What are the Bildungsroman genre of stories about")
+    # wb.search_google(
+    #     "L.A. ofﬁcials attended the 1956 World Series with hopes of luring\
+    #      which team to the West Coast?")
     # counts = wb.answer_frequency(
-    #    ["roman empire", "coming of age", "unrequited love"])
+    #     ["St. Louis Browns", "New York Giants", "Washington Senators"])
+    # counts = wb.answer_frequency_fuzzy(
+    #     ["St. Louis Browns", "New York Giants", "Washington Senators"])
+
+    wb.search_google("What are the Bildungsroman genre of stories about")
+    counts = wb.answer_frequency(
+       ["roman empire", "coming of age", "unrequited love"])
+    counts = wb.answer_frequency_fuzzy(
+       ["roman empire", "coming of age", "unrequited love"])
 
     # wb.search_google("what was the most downloaded iPhone app of 2016")
     # counts = wb.answer_frequency(["snapchat", "messenger", "pokemon go"])
