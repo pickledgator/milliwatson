@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
+
+import configparser
 from PIL import Image
 from PIL import ImageDraw
 import pytesseract
 import os
 import cv2
 import logging
+
+logging.basicConfig(format='(%(levelname)s) %(message)s', level=logging.INFO)
 
 
 class OCR:
@@ -13,10 +17,16 @@ class OCR:
     Cropping boundaries are currently hard-coded for use on an iPhoneX
     """
 
-    def __init__(self):
+    def __init__(self, config_file):
         self.image_name = None
         self.cv_image_data = None
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger.info("Loading config file: {}".format(config_file))
+        config_parse = configparser.ConfigParser()
+        config_parse.read(config_file)
+        self.config = dict(config_parse['DEFAULT'])
+        # ensure all values are ints
+        self.config = dict((k, int(v)) for k, v in self.config.items())
         # All text boxes have the same left alignment
         self.LEFT_ALIGN = 27
         # All text boxes have the same right alignment
@@ -29,20 +39,19 @@ class OCR:
         """
         self.image_name = image_name
         self.image_data = Image.open(image_name)
-        if show:
-            self.image_data.show()
 
-    def draw_bounds(self):
-        image_draw = ImageDraw(self.image_data)
-        image_draw.rectangle([10,10,10,10])
-        image_draw.show()
+    def draw_bounds(self, x, y, w, h):
+        image_draw = ImageDraw.Draw(self.image_data)
+        image_draw.rectangle([x, y, x + w, y + h], outline="red")
 
-    def capture_screen(self, bbox=None, show=False):
+    def capture_screen(self, show=False):
         """Capture screen and save image as a PIL.Image
         """
         self.logger.info("Grabbing screen data")
-        os.system("screencapture -R{},{},{},{} tmp.png".format(
-            bbox[0], bbox[1], bbox[2], bbox[3]))
+        # use Applescript to find the windowid param to pass to screencapture
+        # TODO(curtismuntz): Figure out similar tool for Ubuntu/android
+        os.system(
+            "screencapture -l$(osascript -e 'tell app \"QuickTime Player\" to id of window 1') tmp.png")
         self.image_data = Image.open("tmp.png")
         if show:
             self.image_data.show()
@@ -74,48 +83,73 @@ class OCR:
         """Returns the detected text within the question section of the image
         """
         self.logger.info("Processing question")
-        question_x = self.LEFT_ALIGN
-        question_y = 270
-        question_w = self.WIDTH
-        question_h = 700 - question_y
-        result = self.run_ocr_on_image_section(
-            question_x, question_y, question_w, question_h, show)
+        x = self.config['horizontal_padding'] + \
+            self.config['question_left_margin']
+        y = self.config['question_top_margin'] + \
+            self.config['vertical_padding']  # 270
+        w = self.config['capture_width'] - self.config['horizontal_padding'] - \
+            self.config['question_right_margin'] - \
+            self.config['question_left_margin'] - \
+            self.config['horizontal_padding']
+        h = self.config['question_height']
+        self.draw_bounds(x, y, w, h)
+        result = self.run_ocr_on_image_section(x, y, w, h, show)
         return result
 
     def get_answer_A(self, show=False):
         """Returns the detected text within the first answer section of the image
         """
         self.logger.info("Processing answer 1")
-        answer_a_x = self.LEFT_ALIGN
-        answer_a_y = 705
-        answer_a_w = self.WIDTH
-        answer_a_h = self.ANSWER_HEIGHT
-        result = self.run_ocr_on_image_section(
-            answer_a_x, answer_a_y, answer_a_w, answer_a_h, show)
+        x = self.config['horizontal_padding'] + \
+            self.config['answer_left_margin']
+        y = self.config['vertical_padding'] + self.config['question_top_margin'] + \
+            self.config['question_height'] + \
+            self.config['answer_first_top_margin']
+        w = self.config['capture_width'] - self.config['horizontal_padding'] - \
+            self.config['answer_right_margin'] - \
+            self.config['answer_left_margin'] - \
+            self.config['horizontal_padding']
+        h = self.config['answer_height']
+        self.draw_bounds(x, y, w, h)
+        result = self.run_ocr_on_image_section(x, y, w, h, show)
         return result
 
     def get_answer_B(self, show=False):
         """Returns the detected text within the second answer section of the image
         """
         self.logger.info("Processing answer 2")
-        answer_b_y = 845
-        answer_b_h = self.ANSWER_HEIGHT
-        answer_b_x = self.LEFT_ALIGN
-        answer_b_w = self.WIDTH
-        result = self.run_ocr_on_image_section(
-            answer_b_x, answer_b_y, answer_b_w, answer_b_h, show)
+        x = self.config['horizontal_padding'] + \
+            self.config['answer_left_margin']
+        y = self.config['vertical_padding'] + self.config['question_top_margin'] + \
+            self.config['question_height'] + \
+            self.config['answer_first_top_margin'] + \
+            1 * self.config['answer_height']
+        w = self.config['capture_width'] - self.config['horizontal_padding'] - \
+            self.config['answer_right_margin'] - \
+            self.config['answer_left_margin'] - \
+            self.config['horizontal_padding']
+        h = self.config['answer_height']
+        self.draw_bounds(x, y, w, h)
+        result = self.run_ocr_on_image_section(x, y, w, h, show)
         return result
 
     def get_answer_C(self, show=False):
         """Returns the detected text within the third answer section of the image
         """
         self.logger.info("Processing answer 3")
-        answer_c_y = 985
-        answer_c_h = self.ANSWER_HEIGHT
-        answer_c_x = self.LEFT_ALIGN
-        answer_c_w = self.WIDTH
-        result = self.run_ocr_on_image_section(
-            answer_c_x, answer_c_y, answer_c_w, answer_c_h, show)
+        x = self.config['horizontal_padding'] + \
+            self.config['answer_left_margin']
+        y = self.config['vertical_padding'] + self.config['question_top_margin'] + \
+            self.config['question_height'] + \
+            self.config['answer_first_top_margin'] + \
+            2 * self.config['answer_height']
+        w = self.config['capture_width'] - self.config['horizontal_padding'] - \
+            self.config['answer_right_margin'] - \
+            self.config['answer_left_margin'] - \
+            self.config['horizontal_padding']
+        h = self.config['answer_height']
+        self.draw_bounds(x, y, w, h)
+        result = self.run_ocr_on_image_section(x, y, w, h, show)
         return result
 
     def save_image(self, save_filename):
@@ -156,8 +190,8 @@ class OCR:
         cropped = self.image_data.crop((x, y, x + w, y + h))
         gray = cropped.convert('L')
         img = gray.point(lambda x: 0 if x < 200 else 255, '1')
-        if show:
-            img.show()
+        # if show:
+        #     img.show()
         ret_string = pytesseract.image_to_string(img)
         ret_string = ret_string.replace("\n", " ")
         return ret_string
@@ -174,8 +208,10 @@ def main():
     arg_parser = argparse.ArgumentParser(
         description="Reads a single file and splits it\
          into question and answer options")
-    arg_parser.add_argument("--input_file", "-i",
-                            help="The input file", default="capture_1.jpg")
+    arg_parser.add_argument("--input_file", "-i", help="The input file")
+    arg_parser.add_argument("--config_file", "-f",
+                            help="The phone config file (default: iphone_x_macpro_2880x1800)",
+                            default="configs/iphone_x_macpro_2880x1800")
     arg_parser.add_argument("--capture", "-c", action='store_true',
                             help="Capture the screen")
     arg_parser.add_argument("--save", "-s", help="Save the image")
@@ -183,16 +219,22 @@ def main():
                             help="Display the image")
     args = arg_parser.parse_args()
 
-    ocr = OCR()
+    # verify config file exists
+    if not os.path.exists(args.config_file):
+        print("Must provide valid phone config file (-f)")
+        exit(-1)
+
+    ocr = OCR(args.config_file)
     if args.input_file:
         input_file = sanitize_file(args.input_file)
         ocr.load_image(input_file, show=True)
     if args.capture:
-        ocr.capture_screen(bbox=(0, 23, 494, 1000), show=True)
+        ocr.capture_screen(show=True)
     if args.save:
         ocr.save_image(args.save)
 
     question, a_str, b_str, c_str = ocr.split_image(args.display)
+    ocr.image_data.show()
 
     print("Question: {}".format(question))
     print("Option A: {}".format(a_str))

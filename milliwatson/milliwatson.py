@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import argparse
+import os
 import sys
 import time
 import logging
@@ -22,13 +24,17 @@ kImagesFolder = "images"
 
 class MilliWatson:
 
-    def __init__(self):
+    def __init__(self, config_file):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.ocr = ocr.OCR()
+        self.ocr = ocr.OCR(config_file)
         self.wb = query.WebQuery()
         self.data = {}
         self.running = False
         self.exiting = False
+
+        # create working directories if they don't already exist
+        self.create_directory(kResultsFolder)
+        self.create_directory(kImagesFolder)
 
         signal.signal(signal.SIGINT, self.signal_handler)
         signal.signal(signal.SIGTERM, self.signal_handler)
@@ -67,7 +73,7 @@ class MilliWatson:
 
     def capture(self):
         # this is setup for iPhoneX
-        self.ocr.capture_screen(bbox=(0, 23, 405, 1000))
+        self.ocr.capture_screen()
 
     def process_capture(self):
         id = uuid.uuid1()
@@ -131,6 +137,10 @@ class MilliWatson:
         self.running = False
         self.exiting = True
 
+    def create_directory(self, path):
+        if not os.path.exists(path):
+            os.makedirs(path)
+
 
 class NonBlockingConsole(object):
 
@@ -149,4 +159,11 @@ class NonBlockingConsole(object):
 
 
 if __name__ == "__main__":
-    mW = MilliWatson()
+    arg_parser = argparse.ArgumentParser(
+        description="The newest pint-sized trivia super star")
+    arg_parser.add_argument("--config_file", "-f",
+                            help="The phone config file (default: iphone_x_macpro_2880x1800)",
+                            default="configs/iphone_x_macpro_2880x1800")
+    args = arg_parser.parse_args()
+
+    mW = MilliWatson(args.config_file)
